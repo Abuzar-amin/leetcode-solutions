@@ -11,9 +11,7 @@ class Solution:
         a.append(x)
         x = 0
         for i in range(len(a)):
-            x += a[i] * (10 ** (len(a)-i))
-        print(a)
-        x = x//10
+            x += a[i] * (10 ** (len(a)-i-1))
         if sign:
             x  = -x
         if x > (2 ** 31) - 1 or x < -2 ** 31:
