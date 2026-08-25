@@ -22,9 +22,6 @@ class Solution:
             elif v1 == v2:
                 cur.next = ListNode(v1)
                 cur = cur.next
-                cur.next = ListNode(v2)
-                cur = cur.next
-                l2 = l2.next if l2 else None
                 l1 = l1.next if l1 else None
             elif v1 > v2:
                 cur.next = ListNode(v2)
