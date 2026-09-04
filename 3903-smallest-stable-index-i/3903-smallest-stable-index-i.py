@@ -12,7 +12,7 @@ class Solution:
         print(instability_score)
         for j in range(len(instability_score)):
             if instability_score[j] <= k:
-                return instability_score.index(instability_score[j])
+                return j
         return -1 
 
         
