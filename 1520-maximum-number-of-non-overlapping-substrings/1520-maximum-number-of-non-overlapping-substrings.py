@@ -1,43 +1,37 @@
 class Solution:
-    def maxNumOfSubstrings(self, s: str) -> list[str]:
+    def maxNumOfSubstrings(self, s: str) -> List[str]:
         n = len(s)
-        first = [n] * 26
-        last = [-1] * 26
+        left = [n] * 26
+        right = [0] * 26
 
-        for i, c in enumerate(s):
-            x = ord(c) - 97
-            first[x] = min(first[x], i)
-            last[x] = i
+        # Record the leftmost and rightmost index for each character.
+        for i in range(n):
+            index = ord(s[i]) - ord('a')
+            left[index] = min(left[index], i)
+            right[index] = i
 
-        intervals = []
+        res = []
+        r = -1
 
-        for c in range(26):
-            l = first[c]
-            if l == n:
+        # For each character (if it's the leftmost occurrence),
+        # check if it forms a valid solution.
+        for i in range(n):
+            if i != left[ord(s[i]) - ord('a')]:
                 continue
-
-            r = last[c]
-            i = l
-
-            while i <= r:
-                x = ord(s[i]) - 97
-
-                if first[x] < l:
+            new_r = right[ord(s[i]) - ord('a')]
+            j = i + 1
+            while (j < new_r + 1) :
+                if left[ord(s[j]) - ord('a')] < i:
+                    print
+                    new_r = n
                     break
+                new_r = max(new_r, right[ord(s[j]) - ord('a')])
+                j = j + 1
+            if new_r < n and (i > r or new_r < right[ord(s[r]) - ord('a')]):
+                if i > r:
+                    res.append(s[i:new_r + 1])
+                else:
+                    res[-1] = s[i:new_r + 1]
+                r = new_r
 
-                r = max(r, last[x])
-                i += 1
-            else:
-                intervals.append((l, r))
-
-        intervals.sort(key=lambda x: x[1])
-
-        ans = []
-        end = -1
-
-        for l, r in intervals:
-            if l > end:
-                ans.append(s[l:r + 1])
-                end = r
-
-        return ans
+        return res
