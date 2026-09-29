@@ -1,11 +1,8 @@
 class Solution:
-    def hasValidPath(self, grid: list[list[str]]) -> bool:
+    def hasValidPath(self, grid):
         m, n = len(grid), len(grid[0])
 
-        if (m + n - 1) % 2 == 1:
-            return False
-
-        if grid[0][0] == ')' or grid[m - 1][n - 1] == '(':
+        if (m + n) % 2 == 0 or grid[0][0] == ')' or grid[-1][-1] == '(':
             return False
 
         dp = [[set() for _ in range(n)] for _ in range(m)]
@@ -13,15 +10,11 @@ class Solution:
 
         for i in range(m):
             for j in range(n):
-                for balance in dp[i][j]:
-                    if i + 1 < m:
-                        new_balance = balance + (1 if grid[i + 1][j] == '(' else -1)
-                        if new_balance >= 0:
-                            dp[i + 1][j].add(new_balance)
+                for b in dp[i][j]:
+                    for x, y in ((i + 1, j), (i, j + 1)):
+                        if x < m and y < n:
+                            nb = b + (1 if grid[x][y] == '(' else -1)
+                            if nb >= 0:
+                                dp[x][y].add(nb)
 
-                    if j + 1 < n:
-                        new_balance = balance + (1 if grid[i][j + 1] == '(' else -1)
-                        if new_balance >= 0:
-                            dp[i][j + 1].add(new_balance)
-
-        return 0 in dp[m - 1][n - 1]
+        return 0 in dp[-1][-1]
