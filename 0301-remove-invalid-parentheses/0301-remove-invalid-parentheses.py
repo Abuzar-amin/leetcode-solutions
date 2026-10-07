@@ -1,43 +1,35 @@
 class Solution:
     def removeInvalidParentheses(self, s: str) -> list[str]:
-        left = right = 0
+        ans = []
 
-        for ch in s:
-            if ch == '(':
-                left += 1
-            elif ch == ')':
-                if left:
-                    left -= 1
-                else:
-                    right += 1
+        def remove(s, start, last, par):
+            balance = 0
 
-        ans = set()
+            for i in range(start, len(s)):
+                if s[i] == par[0]:
+                    balance += 1
+                elif s[i] == par[1]:
+                    balance -= 1
 
-        def dfs(i, path, balance, lremove, rremove):
-            if i == len(s):
-                if balance == 0 and lremove == 0 and rremove == 0:
-                    ans.add(''.join(path))
+                if balance >= 0:
+                    continue
+
+                for j in range(last, i + 1):
+                    if s[j] == par[1] and (j == last or s[j - 1] != par[1]):
+                        remove(
+                            s[:j] + s[j + 1:],
+                            i,
+                            j,
+                            par
+                        )
                 return
 
-            ch = s[i]
+            s = s[::-1]
 
-            if ch == '(' and lremove:
-                dfs(i + 1, path, balance, lremove - 1, rremove)
-
-            if ch == ')' and rremove:
-                dfs(i + 1, path, balance, lremove, rremove - 1)
-
-            path.append(ch)
-
-            if ch == '(':
-                dfs(i + 1, path, balance + 1, lremove, rremove)
-            elif ch == ')':
-                if balance:
-                    dfs(i + 1, path, balance - 1, lremove, rremove)
+            if par[0] == '(':
+                remove(s, 0, 0, ')(')
             else:
-                dfs(i + 1, path, balance, lremove, rremove)
+                ans.append(s)
 
-            path.pop()
-
-        dfs(0, [], 0, left, right)
-        return list(ans)
+        remove(s, 0, 0, '()')
+        return ans
