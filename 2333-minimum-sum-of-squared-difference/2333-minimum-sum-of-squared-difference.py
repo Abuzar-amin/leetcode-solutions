@@ -1,33 +1,31 @@
 class Solution:
     def minSumSquareDiff(self, nums1: list[int], nums2: list[int],
                          k1: int, k2: int) -> int:
-        diff = [abs(a - b) for a, b in zip(nums1, nums2)]
         k = k1 + k2
+        total = 0
+        max_diff = 0
 
-        if k >= sum(diff):
+        for a, b in zip(nums1, nums2):
+            diff = abs(a - b)
+            total += diff
+            max_diff = max(max_diff, diff)
+
+        if k >= total:
             return 0
 
-        low = 0
-        high = max(diff)
+        freq = [0] * (max_diff + 1)
 
-        while low < high:
-            mid = (low + high) // 2
-            needed = sum(max(x - mid, 0) for x in diff)
+        for a, b in zip(nums1, nums2):
+            freq[abs(a - b)] += 1
 
-            if needed <= k:
-                high = mid
-            else:
-                low = mid + 1
+        for diff in range(max_diff, 0, -1):
+            if k == 0:
+                break
 
-        level = low
-        needed = sum(max(x - level, 0) for x in diff)
-        remaining = k - needed
+            moves = min(freq[diff], k)
+            freq[diff] -= moves
+            freq[diff - 1] += moves
+            k -= moves
 
-        ans = 0
-
-        for x in diff:
-            ans += min(x, level) ** 2
-
-        ans -= remaining * (2 * level - 1)
-
-        return ans
+        return sum(diff * diff * count
+                   for diff, count in enumerate(freq))
