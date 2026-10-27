@@ -1,15 +1,10 @@
 class Solution:
     def createGrid(self, m: int, n: int) -> list[str]:
-        grid = []
+        grid = [['#'] * n for _ in range(m)]
 
         for i in range(m):
-            row = ['#'] * n
+            grid[i][0] = '.'
 
-            if i == m - 1:
-                row = ['.'] * n
-            else:
-                row[0] = '.'
+        grid[m - 1] = ['.'] * n
 
-            grid.append(''.join(row))
-
-        return grid
+        return [''.join(row) for row in grid]
