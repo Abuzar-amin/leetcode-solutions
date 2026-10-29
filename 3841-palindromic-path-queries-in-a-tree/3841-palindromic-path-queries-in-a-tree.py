@@ -1,26 +1,10 @@
-class FenwickTree:
-    def __init__(self, n):
-        self.n = n
-        self.tree = [0] * (n + 1)
-
-    def update(self, i, value):
-        i += 1
-        while i <= self.n:
-            self.tree[i] ^= value
-            i += i & -i
-
-    def query(self, i):
-        result = 0
-        while i > 0:
-            result ^= self.tree[i]
-            i -= i & -i
-        return result
-
+from typing import List
 
 class Solution:
-    def palindromePath(self, n, edges, s, queries):
-        graph = [[] for _ in range(n)]
+    def palindromePath(self, n: int, edges: List[List[int]],
+                       s: str, queries: List[str]) -> List[bool]:
 
+        graph = [[] for _ in range(n)]
         for u, v in edges:
             graph[u].append(v)
             graph[v].append(u)
@@ -31,6 +15,7 @@ class Solution:
         tout = [0] * n
         timer = 0
 
+        # Build Euler tour without recursion
         stack = [(0, 0, False)]
 
         while stack:
@@ -46,29 +31,30 @@ class Solution:
 
             stack.append((node, par, True))
 
-            for child in reversed(graph[node]):
+            for child in graph[node]:
                 if child != par:
                     depth[child] = depth[node] + 1
                     stack.append((child, node, False))
 
+        # Binary lifting for LCA
         levels = n.bit_length()
         up = [parent[:]]
 
         for j in range(1, levels):
-            previous = up[-1]
-            up.append([previous[previous[i]] for i in range(n)])
+            prev = up[-1]
+            up.append([prev[prev[i]] for i in range(n)])
 
         def lca(u, v):
             if depth[u] < depth[v]:
                 u, v = v, u
 
-            difference = depth[u] - depth[v]
+            diff = depth[u] - depth[v]
             bit = 0
 
-            while difference:
-                if difference & 1:
+            while diff:
+                if diff & 1:
                     u = up[bit][u]
-                difference >>= 1
+                diff >>= 1
                 bit += 1
 
             if u == v:
@@ -81,27 +67,48 @@ class Solution:
 
             return parent[u]
 
+        # Fenwick tree with XOR
+        bit = [0] * (n + 1)
+
+        def add(index, value):
+            index += 1
+            while index <= n:
+                bit[index] ^= value
+                index += index & -index
+
+        def prefix(index):
+            result = 0
+            index += 1
+
+            while index > 0:
+                result ^= bit[index]
+                index -= index & -index
+
+            return result
+
+        def update_subtree(node, change):
+            add(tin[node], change)
+
+            if tout[node] < n:
+                add(tout[node], change)
+
         chars = [1 << (ord(c) - ord('a')) for c in s]
-        tree = FenwickTree(n)
 
         for node in range(n):
-            tree.update(tin[node], chars[node])
-            tree.update(tout[node], chars[node])
+            update_subtree(node, chars[node])
 
-        ans = []
+        answer = []
 
         for query in queries:
             parts = query.split()
-            op = parts[0]
             u = int(parts[1])
 
-            if op == "update":
+            if parts[0] == "update":
                 new_char = 1 << (ord(parts[2]) - ord('a'))
                 change = chars[u] ^ new_char
 
                 if change:
-                    tree.update(tin[u], change)
-                    tree.update(tout[u], change)
+                    update_subtree(u, change)
                     chars[u] = new_char
 
             else:
@@ -109,11 +116,11 @@ class Solution:
                 ancestor = lca(u, v)
 
                 mask = (
-                    tree.query(tin[u] + 1)
-                    ^ tree.query(tin[v] + 1)
+                    prefix(tin[u])
+                    ^ prefix(tin[v])
                     ^ chars[ancestor]
                 )
 
-                ans.append((mask & (mask - 1)) == 0)
+                answer.append((mask & (mask - 1)) == 0)
 
-        return ans
+        return answer
