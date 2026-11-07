@@ -25,8 +25,8 @@ class Solution:
                     heapq.heappush(available, (weight, index))
 
             weight, index = heapq.heappop(available)
-
             ans.append(index)
+
             heapq.heappush(busy, (time + task, weight, index))
 
         return ans
